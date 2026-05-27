@@ -1,0 +1,303 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Task Manager API",
+    "description": "API para gestionar tareas",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@taskmanager.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001",
+      "description": "Servidor de desarrollo"
+    }
+  ],
+  "paths": {
+    "/api/tasks": {
+      "get": {
+        "summary": "Obtener todas las tareas",
+        "description": "Retorna un array con todas las tareas",
+        "tags": ["Tasks"],
+        "responses": {
+          "200": {
+            "description": "Lista de tareas",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "id": "uuid-v4",
+                    "title": "Tarea 1",
+                    "description": "Descripción de la tarea",
+                    "completed": false,
+                    "createdAt": "2026-05-06T00:00:00.000Z",
+                    "updatedAt": "2026-05-06T00:00:00.000Z"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear una nueva tarea",
+        "description": "Crea una tarea con los datos proporcionados",
+        "tags": ["Tasks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Título de la tarea"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descripción de la tarea"
+                  }
+                },
+                "required": ["title"]
+              },
+              "example": {
+                "title": "Nueva tarea",
+                "description": "Descripción de la tarea"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tarea creada exitosamente"
+          },
+          "400": {
+            "description": "Error de validación"
+          }
+        }
+      }
+    },
+    "/api/tasks/{id}": {
+      "get": {
+        "summary": "Obtener tarea por ID",
+        "description": "Retorna los detalles de una tarea específica",
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID único de la tarea (UUID)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tarea encontrada"
+          },
+          "404": {
+            "description": "Tarea no encontrada"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar una tarea",
+        "description": "Actualiza los datos de una tarea existente",
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID único de la tarea (UUID)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Título de la tarea"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Descripción de la tarea"
+                  },
+                  "completed": {
+                    "type": "boolean",
+                    "description": "Estado de completitud"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tarea actualizada"
+          },
+          "404": {
+            "description": "Tarea no encontrada"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar una tarea",
+        "description": "Elimina una tarea por su ID",
+        "tags": ["Tasks"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID único de la tarea (UUID)",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tarea eliminada"
+          },
+          "404": {
+            "description": "Tarea no encontrada"
+          }
+        }
+      }
+    },
+    "/api/users/register": {
+      "post": {
+        "summary": "Registrar un nuevo usuario",
+        "description": "Crea un nuevo usuario en el sistema",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nombre del usuario"
+                  },
+                  "lastname": {
+                    "type": "string",
+                    "description": "Apellido del usuario"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Correo electrónico"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Contraseña"
+                  }
+                },
+                "required": ["name", "lastname", "email", "password"]
+              },
+              "example": {
+                "name": "John",
+                "lastname": "Doe",
+                "email": "john@example.com",
+                "password": "securepassword123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario creado exitosamente",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "uuid-v4",
+                  "name": "John",
+                  "lastname": "Doe",
+                  "email": "john@example.com",
+                  "createdAt": "2026-05-12T00:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación"
+          },
+          "409": {
+            "description": "Email ya registrado"
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "summary": "Iniciar sesión",
+        "description": "Autentica al usuario y retorna un token",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "Correo electrónico"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Contraseña"
+                  }
+                },
+                "required": ["email", "password"]
+              },
+              "example": {
+                "email": "john@example.com",
+                "password": "securepassword123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "user": {
+                    "id": "uuid-v4",
+                    "name": "John",
+                    "lastname": "Doe",
+                    "email": "john@example.com",
+                    "createdAt": "2026-05-12T00:00:00.000Z"
+                  },
+                  "token": "uuid-v4-token"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciales inválidas"
+          }
+        }
+      }
+    }
+  }
+}
