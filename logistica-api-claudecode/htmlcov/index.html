@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coverage Dashboard — Logistics API</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:        #080c14;
+      --surface:   #0f1624;
+      --surface2:  #161e2e;
+      --surface3:  #1d2640;
+      --border:    #1f2d45;
+      --text:      #e8edf5;
+      --muted:     #6b7a95;
+      --dim:       #3d4f6b;
+      --green:     #10b981;
+      --green-lt:  #34d399;
+      --blue:      #3b82f6;
+      --blue-lt:   #60a5fa;
+      --purple:    #8b5cf6;
+      --amber:     #f59e0b;
+      --red:       #ef4444;
+      --cyan:      #06b6d4;
+      --pink:      #ec4899;
+      --teal:      #14b8a6;
+      --orange:    #f97316;
+      --indigo:    #6366f1;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #0d1730 0%, #111827 50%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 48px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .header-brand { display: flex; align-items: center; gap: 12px; }
+    .header-icon {
+      width: 38px; height: 38px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .header-title { font-size: 17px; font-weight: 800; letter-spacing: -0.4px; }
+    .header-title span { color: var(--blue-lt); }
+    .header-sub { font-size: 11px; color: var(--muted); }
+    .header-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 99px; padding: 3px 10px;
+      font-size: 11px; color: var(--muted);
+    }
+    .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .status-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: #10b98118; border: 1px solid #10b98144;
+      border-radius: 99px; padding: 4px 12px;
+      font-size: 12px; font-weight: 600; color: var(--green);
+    }
+    .pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 6px var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+    .header-date { font-size: 11px; color: var(--muted); }
+
+    /* ── MAIN ── */
+    main { max-width: 1400px; margin: 0 auto; padding: 36px 48px 60px; }
+
+    /* ── SECTION LABEL ── */
+    .section-lbl {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 18px; margin-top: 40px;
+    }
+    .section-lbl:first-of-type { margin-top: 0; }
+    .accent-bar {
+      width: 3px; height: 22px; border-radius: 99px;
+      background: linear-gradient(to bottom, var(--blue), var(--purple));
+      flex-shrink: 0;
+    }
+    .accent-bar.green { background: linear-gradient(to bottom, var(--green), var(--green-lt)); }
+    .section-lbl h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+    .section-lbl .sub { font-size: 11px; color: var(--muted); }
+
+    /* ── KPI CARDS ── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px; margin-bottom: 36px;
+    }
+    @media(max-width:1100px){ .kpi-row{grid-template-columns:repeat(3,1fr)} }
+    @media(max-width:680px) { .kpi-row{grid-template-columns:repeat(2,1fr)} }
+    .kpi {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 20px;
+      position: relative; overflow: hidden;
+    }
+    .kpi::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; border-radius: 14px 14px 0 0;
+    }
+    .kpi.k-green::before  { background: linear-gradient(90deg, var(--green), var(--green-lt)); }
+    .kpi.k-blue::before   { background: linear-gradient(90deg, var(--blue), var(--blue-lt)); }
+    .kpi.k-purple::before { background: linear-gradient(90deg, var(--purple), #a78bfa); }
+    .kpi.k-amber::before  { background: linear-gradient(90deg, var(--amber), #fcd34d); }
+    .kpi.k-cyan::before   { background: linear-gradient(90deg, var(--cyan), #67e8f9); }
+    .kpi-icon { font-size: 20px; margin-bottom: 8px; }
+    .kpi-val {
+      font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .kpi.k-green  .kpi-val { color: var(--green-lt); }
+    .kpi.k-blue   .kpi-val { color: var(--blue-lt); }
+    .kpi.k-purple .kpi-val { color: #a78bfa; }
+    .kpi.k-amber  .kpi-val { color: #fcd34d; }
+    .kpi.k-cyan   .kpi-val { color: #67e8f9; }
+    .kpi-lbl { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .kpi-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    }
+    .chart-card { padding: 22px 24px; }
+    .ct { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .cs { font-size: 11px; color: var(--muted); margin-bottom: 18px; }
+
+    /* ── CHART LAYOUTS ── */
+    .charts-2col {
+      display: grid; grid-template-columns: 1.45fr 1fr;
+      gap: 16px; margin-bottom: 16px;
+    }
+    @media(max-width:950px){ .charts-2col{grid-template-columns:1fr} }
+    .chart-box { position: relative; }
+    .h360 { height: 360px; }
+    .h300 { height: 300px; }
+    .h280 { height: 280px; }
+    .h260 { height: 260px; }
+
+    /* ── MODULE TABLE ── */
+    .tbl-wrap {
+      border: 1px solid var(--border); border-radius: 14px;
+      overflow-x: auto; margin-bottom: 16px;
+    }
+    table.mt { width: 100%; border-collapse: collapse; }
+    .mt th {
+      background: var(--surface2);
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.7px;
+      color: var(--muted); padding: 11px 16px;
+      text-align: left; border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .mt td { padding: 11px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .mt tr:last-child td { border-bottom: none; }
+    .mt tbody tr:hover td { background: var(--surface2); }
+
+    .mn { font-weight: 700; font-size: 13px; }
+    .mp { font-family: 'Courier New', monospace; font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .cvb {
+      display: inline-block; font-size: 12px; font-weight: 800;
+      padding: 3px 9px; border-radius: 7px;
+      min-width: 48px; text-align: center; white-space: nowrap;
+    }
+    .cv-100 { background:#10b98118; color:var(--green-lt); }
+    .cv-99  { background:#10b98110; color:#6ee7b7; }
+    .cv-93  { background:#f59e0b18; color:#fcd34d; }
+
+    .mbar-wrap { display:flex; align-items:center; gap:8px; }
+    .mbar { flex:1; height:5px; background:var(--surface3); border-radius:99px; overflow:hidden; min-width:50px; }
+    .mbar-fill { height:100%; border-radius:99px; }
+    .mb-g { background: linear-gradient(90deg,#065f46,var(--green)); }
+    .mb-y { background: linear-gradient(90deg,#78350f,var(--amber)); }
+
+    .fp { font-weight:700; font-size:12px; }
+    .fp-100 { color:var(--green-lt); }
+    .fp-hi  { color:#6ee7b7; }
+    .fp-mid { color:var(--amber); }
+    .fp-low { color:var(--red); }
+    .fp-na  { color:var(--dim); }
+
+    .rlink {
+      display:inline-flex; align-items:center; gap:4px;
+      color:var(--blue); font-size:11px; text-decoration:none;
+      padding:3px 8px; border-radius:6px; border:1px solid #3b82f644;
+      transition:background .15s; white-space:nowrap;
+    }
+    .rlink:hover { background:#3b82f618; }
+
+    /* ── BUGS ── */
+    .bugs-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 14px; margin-bottom: 16px;
+    }
+    @media(max-width:900px){ .bugs-grid{grid-template-columns:1fr} }
+    .bug {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 18px 18px 22px;
+      position: relative; overflow: hidden;
+    }
+    .bug::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+      background: linear-gradient(to bottom, var(--green), var(--green-lt));
+      border-radius: 14px 0 0 14px;
+    }
+    .bug-num { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); margin-bottom:6px; }
+    .bug-title { font-size:13px; font-weight:700; margin-bottom:6px; }
+    .bug-body { font-size:12px; color:var(--muted); line-height:1.55; margin-bottom:10px; }
+    .bc { font-family:'Courier New',monospace; font-size:11px; background:var(--surface2); padding:1px 5px; border-radius:4px; color:#93c5fd; }
+    .fixed-tag {
+      display:inline-flex; align-items:center; gap:5px;
+      background:#10b98118; border:1px solid #10b98144;
+      color:var(--green); border-radius:99px; padding:2px 9px;
+      font-size:11px; font-weight:600;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align:center; padding:28px 48px;
+      border-top:1px solid var(--border);
+      color:var(--muted); font-size:11px;
+    }
+    footer span { color:var(--dim); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="header-icon">📦</div>
+      <div>
+        <div class="header-title">Logistics API &mdash; <span>Coverage Dashboard</span></div>
+        <div class="header-sub">SDD · Spec Driven Development · Django 6.0.5 + DRF 3.17.1</div>
+      </div>
+    </div>
+    <div class="header-pills">
+      <span class="pill">Django 6.0.5</span>
+      <span class="pill">DRF 3.17.1</span>
+      <span class="pill">Python 3.13</span>
+      <span class="pill">coverage.py 7.14.1</span>
+      <span class="pill">simplejwt 5.5.1</span>
+    </div>
+    <div class="header-right">
+      <div class="status-badge"><span class="pulse"></span> 553 / 553 tests passing</div>
+      <span class="header-date">26 mayo 2026</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-row">
+    <div class="kpi k-green">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-val" data-count="553">0</div>
+      <div class="kpi-lbl">Tests totales</div>
+      <div class="kpi-sub">0 fallos · 0 errores</div>
+    </div>
+    <div class="kpi k-blue">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-val">~99%</div>
+      <div class="kpi-lbl">Cobertura global</div>
+      <div class="kpi-sub">Promedio 9 módulos</div>
+    </div>
+    <div class="kpi k-purple">
+      <div class="kpi-icon">🧩</div>
+      <div class="kpi-val" data-count="9">0</div>
+      <div class="kpi-lbl">Módulos cubiertos</div>
+      <div class="kpi-sub">auth + 8 apps Django</div>
+    </div>
+    <div class="kpi k-amber">
+      <div class="kpi-icon">🐛</div>
+      <div class="kpi-val" data-count="3">0</div>
+      <div class="kpi-lbl">Bugs corregidos</div>
+      <div class="kpi-sub">Detectados en testing</div>
+    </div>
+    <div class="kpi k-cyan">
+      <div class="kpi-icon">💯</div>
+      <div class="kpi-val" data-count="6">0</div>
+      <div class="kpi-lbl">Módulos al 100%</div>
+      <div class="kpi-sub">auth, customers, suppliers…</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="section-lbl">
+    <span class="accent-bar"></span>
+    <div>
+      <h2>Cobertura de código por módulo</h2>
+      <span class="sub">Umbral mínimo requerido: 80% &mdash; todos los módulos lo superan</span>
+    </div>
+  </div>
+
+  <div class="charts-2col">
+    <div class="card chart-card">
+      <div class="ct">Cobertura (%) por módulo</div>
+      <div class="cs">Línea punteada roja = umbral 80% &middot; Barras verdes = 100% &middot; Menta = 99%</div>
+      <div class="chart-box h360"><canvas id="covChart"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <div class="ct">Distribución de tests por módulo</div>
+      <div class="cs">Total: 553 tests · Tamaño proporcional al número de tests</div>
+      <div class="chart-box h360"><canvas id="distChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHART ROW 2: Test composition -->
+  <div class="section-lbl" style="margin-top:24px;">
+    <span class="accent-bar"></span>
+    <div>
+      <h2>Composición de tests por módulo</h2>
+      <span class="sub">Desglose por tipo: modelos &middot; serializers &middot; vistas/endpoints &middot; click en la leyenda para filtrar</span>
+    </div>
+  </div>
+
+  <div class="card chart-card" style="margin-bottom:36px;">
+    <div class="ct">Tests por tipo (modelos / serializers / vistas)</div>
+    <div class="cs">Barras apiladas horizontales — Auth solo tiene test_auth.py (endpoints)</div>
+    <div class="chart-box h300"><canvas id="compChart"></canvas></div>
+  </div>
+
+  <!-- MODULE TABLE -->
+  <div class="section-lbl">
+    <span class="accent-bar"></span>
+    <div>
+      <h2>Detalle por módulo</h2>
+      <span class="sub">Cobertura individual de cada archivo &middot; links a reportes HTML de coverage.py</span>
+    </div>
+  </div>
+
+  <div class="tbl-wrap" style="margin-bottom:36px;">
+    <table class="mt">
+      <thead>
+        <tr>
+          <th>Módulo</th>
+          <th>Tests</th>
+          <th style="min-width:180px;">Cobertura</th>
+          <th>models.py</th>
+          <th>serializers.py</th>
+          <th>views.py</th>
+          <th>filters.py</th>
+          <th>admin.py</th>
+          <th>Reporte</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="mn">Auth JWT</div><div class="mp">common/tests/test_auth.py</div></td>
+          <td><strong>21</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-y" style="width:93%"></div></div><span class="cvb cv-93">93%</span></div></td>
+          <td><span class="fp fp-na">—</span></td>
+          <td><span class="fp fp-na">—</span></td>
+          <td><span class="fp fp-na">—</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-na">—</span></td>
+          <td><a class="rlink" href="auth/index.html">Reporte →</a></td>
+        </tr>
+        <tr>
+          <td><div class="mn">Customers</div><div class="mp">apps/customers/</div></td>
+          <td><strong>70</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-g" style="width:100%"></div></div><span class="cvb cv-100">100%</span></div></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><a class="rlink" href="customers/index.html">Reporte →</a></td>
+        </tr>
+        <tr>
+          <td><div class="mn">Suppliers</div><div class="mp">apps/suppliers/</div></td>
+          <td><strong>57</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-g" style="width:100%"></div></div><span class="cvb cv-100">100%</span></div></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><a class="rlink" href="suppliers/index.html">Reporte →</a></td>
+        </tr>
+        <tr>
+          <td><div class="mn">Products</div><div class="mp">apps/products/</div></td>
+          <td><strong>51</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-g" style="width:100%"></div></div><span class="cvb cv-100">100%</span></div></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><a class="rlink" href="products/index.html">Reporte →</a></td>
+        </tr>
+        <tr>
+          <td><div class="mn">Warehouses</div><div class="mp">apps/warehouses/</div></td>
+          <td><strong>45</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-g" style="width:100%"></div></div><span class="cvb cv-100">100%</span></div></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><a class="rlink" href="warehouses/index.html">Reporte →</a></td>
+        </tr>
+        <tr>
+          <td><div class="mn">Drivers</div><div class="mp">apps/drivers/</div></td>
+          <td><strong>69</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-g" style="width:100%"></div></div><span class="cvb cv-100">100%</span></div></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><a class="rlink" href="drivers/index.html">Reporte →</a></td>
+        </tr>
+        <tr>
+          <td><div class="mn">Transport</div><div class="mp">apps/transport/</div></td>
+          <td><strong>65</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-g" style="width:99%"></div></div><span class="cvb cv-99">99%</span></div></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><a class="rlink" href="transport/index.html">Reporte →</a></td>
+        </tr>
+        <tr>
+          <td><div class="mn">Routes</div><div class="mp">apps/routes/</div></td>
+          <td><strong>82</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-g" style="width:99%"></div></div><span class="cvb cv-99">99%</span></div></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><a class="rlink" href="routes/index.html">Reporte →</a></td>
+        </tr>
+        <tr>
+          <td><div class="mn">Shipments</div><div class="mp">apps/shipments/</div></td>
+          <td><strong>93</strong></td>
+          <td><div class="mbar-wrap"><div class="mbar"><div class="mbar-fill mb-g" style="width:99%"></div></div><span class="cvb cv-99">99%</span></div></td>
+          <td><span class="fp fp-hi">96%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-hi">95%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><span class="fp fp-100">100%</span></td>
+          <td><a class="rlink" href="shipments/index.html">Reporte →</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BUGS -->
+  <div class="section-lbl">
+    <span class="accent-bar green"></span>
+    <div>
+      <h2>Bugs detectados y corregidos durante el testing</h2>
+      <span class="sub">3 bugs encontrados &mdash; todos corregidos antes de continuar al siguiente módulo</span>
+    </div>
+  </div>
+
+  <div class="bugs-grid">
+    <div class="bug">
+      <div class="bug-num">Bug #1 &middot; Todos los ViewSets &times;8</div>
+      <div class="bug-title">POST 201 sin campo <code class="bc">id</code> en respuesta</div>
+      <div class="bug-body">
+        El ViewSet usaba <code class="bc">WriteSerializer</code> para serializar la respuesta de creación,
+        que excluye el campo <code class="bc">id</code>. Detectado en el módulo <em>customers</em> y
+        propagado al resto.
+        <br><br>
+        <strong>Fix:</strong> Override de <code class="bc">create()</code> en los 8 ViewSets para
+        guardar con WriteSerializer pero responder con <code class="bc">DetailSerializer</code>.
+      </div>
+      <span class="fixed-tag">✓ Corregido en views.py &times; 8</span>
+    </div>
+    <div class="bug">
+      <div class="bug-num">Bug #2 &middot; Routes</div>
+      <div class="bug-title"><code class="bc">IntegrityError</code> no capturado en RouteStop</div>
+      <div class="bug-body">
+        Violar <code class="bc">unique_together('route', 'order')</code> retornaba HTTP 500.
+        DRF no puede validar este constraint a nivel de serializer porque <code class="bc">route</code>
+        no es campo del WriteSerializer (se inyecta desde la URL).
+        <br><br>
+        <strong>Fix:</strong> Bloque <code class="bc">try/except IntegrityError</code>
+        → <code class="bc">ValidationError</code> con HTTP 400.
+      </div>
+      <span class="fixed-tag">✓ Corregido en routes/views.py</span>
+    </div>
+    <div class="bug">
+      <div class="bug-num">Bug #3 &middot; Shipments</div>
+      <div class="bug-title"><code class="bc">IntegrityError</code> + <code class="bc">UnorderedObjectListWarning</code></div>
+      <div class="bug-body">
+        Mismo patrón que Bug #2 en <code class="bc">ShipmentProductViewSet</code> para
+        <code class="bc">unique_together('shipment', 'product')</code>. Además,
+        <code class="bc">ShipmentProduct.Meta</code> sin <code class="bc">ordering</code>
+        generaba advertencia en paginación.
+        <br><br>
+        <strong>Fix:</strong> <code class="bc">try/except</code> + migración
+        <code class="bc">0002_alter_shipmentproduct_options</code>.
+      </div>
+      <span class="fixed-tag">✓ Corregido en shipments/views.py + migración</span>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Logistics API &nbsp;&middot;&nbsp; Coverage Dashboard &nbsp;&middot;&nbsp;
+  coverage.py 7.14.1 &nbsp;&middot;&nbsp; Django 6.0.5 &nbsp;&middot;&nbsp; DRF 3.17.1
+  <br>
+  <span>553 tests passing &nbsp;&middot;&nbsp; 26 mayo 2026 &nbsp;&middot;&nbsp; SDD — Spec Driven Development</span>
+</footer>
+
+<script>
+  /* ── DATA ── */
+  const MODS = ['Auth','Customers','Suppliers','Products','Warehouses','Drivers','Transport','Routes','Shipments'];
+  const COV  = [93, 100, 100, 100, 100, 100, 99, 99, 99];
+  const TST  = [21,  70,  57,  51,  45,  69, 65, 82, 93];
+  // Test breakdown (models / serializers / views)
+  const T_MOD = [0,  12, 12, 11, 10, 14, 13, 16, 18];
+  const T_SER = [0,  17, 15, 14, 12, 18, 15, 20, 22];
+  const T_VIW = [21, 41, 30, 26, 23, 37, 37, 46, 53];
+
+  const PAL = ['#6366f1','#10b981','#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ec4899','#14b8a6','#f97316'];
+
+  /* ── ANIMATED COUNTERS ── */
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = +el.dataset.count, dur = 1000, step = target / (dur / 16);
+    let cur = 0;
+    const t = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      el.textContent = Math.floor(cur);
+      if (cur >= target) clearInterval(t);
+    }, 16);
+  });
+
+  /* ── PLUGIN: 80% threshold line on coverage chart ── */
+  const thresholdPlugin = {
+    id: 'threshold',
+    afterDraw(chart) {
+      if (chart.canvas.id !== 'covChart') return;
+      const { ctx, scales: { x, y } } = chart;
+      const px = x.getPixelForValue(80);
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(px, y.top);
+      ctx.lineTo(px, y.bottom);
+      ctx.strokeStyle = '#ef444499';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 4]);
+      ctx.stroke();
+      ctx.fillStyle = '#ef4444cc';
+      ctx.font = '600 10px Inter, system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('mín. 80%', px + 4, y.top + 11);
+      ctx.restore();
+    }
+  };
+
+  /* ── PLUGIN: data labels at end of coverage bars ── */
+  const labelsPlugin = {
+    id: 'barLabels',
+    afterDatasetsDraw(chart) {
+      if (chart.canvas.id !== 'covChart') return;
+      const { ctx, data, scales: { x } } = chart;
+      const meta = chart.getDatasetMeta(0);
+      data.datasets[0].data.forEach((val, i) => {
+        const bar = meta.data[i];
+        ctx.save();
+        ctx.fillStyle = '#e8edf5cc';
+        ctx.font = '600 11px Inter, system-ui';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(val + '%', x.getPixelForValue(val) + 5, bar.y);
+        ctx.restore();
+      });
+    }
+  };
+
+  /* ── PLUGIN: center label for doughnut ── */
+  const centerPlugin = {
+    id: 'center',
+    afterDraw(chart) {
+      if (chart.canvas.id !== 'distChart') return;
+      if (!chart.chartArea) return;
+      const { ctx, chartArea: { left, top, width, height } } = chart;
+      const cx = left + width / 2, cy = top + height / 2;
+      ctx.save();
+      ctx.font = '800 26px Inter, system-ui';
+      ctx.fillStyle = '#e8edf5';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('553', cx, cy - 9);
+      ctx.font = '400 11px Inter, system-ui';
+      ctx.fillStyle = '#6b7a95';
+      ctx.fillText('tests', cx, cy + 13);
+      ctx.restore();
+    }
+  };
+
+  /* ── CHART 1: Horizontal bar — Coverage ── */
+  new Chart(document.getElementById('covChart'), {
+    type: 'bar',
+    plugins: [thresholdPlugin, labelsPlugin],
+    data: {
+      labels: MODS,
+      datasets: [{
+        label: 'Cobertura %',
+        data: COV,
+        backgroundColor: COV.map(v => v === 100 ? '#10b98150' : v >= 99 ? '#10b98130' : '#f59e0b30'),
+        borderColor:     COV.map(v => v === 100 ? '#10b981'   : v >= 99 ? '#6ee7b7'   : '#f59e0b'),
+        borderWidth: 1.5,
+        borderRadius: 5,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `  ${ctx.raw}% cobertura` } }
+      },
+      layout: { padding: { right: 36 } },
+      scales: {
+        x: {
+          min: 70, max: 103,
+          ticks: { color: '#6b7a95', font: { size: 11 }, callback: v => v <= 100 ? v + '%' : '' },
+          grid: { color: '#1f2d4555' }
+        },
+        y: {
+          ticks: { color: '#94a3b8', font: { size: 12, weight: '500' } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  /* ── CHART 2: Doughnut — Test distribution ── */
+  new Chart(document.getElementById('distChart'), {
+    type: 'doughnut',
+    plugins: [centerPlugin],
+    data: {
+      labels: MODS,
+      datasets: [{
+        data: TST,
+        backgroundColor: PAL.map(c => c + 'bb'),
+        borderColor: PAL,
+        borderWidth: 2,
+        hoverOffset: 10,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: '#94a3b8', font: { size: 11 }, padding: 12, boxWidth: 11, boxHeight: 11 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.raw} tests (${Math.round(ctx.raw / 553 * 100)}%)`
+          }
+        }
+      }
+    }
+  });
+
+  /* ── CHART 3: Stacked horizontal bar — Test composition ── */
+  new Chart(document.getElementById('compChart'), {
+    type: 'bar',
+    data: {
+      labels: MODS,
+      datasets: [
+        {
+          label: 'Modelos',
+          data: T_MOD,
+          backgroundColor: '#10b98177',
+          borderColor: '#10b981',
+          borderWidth: 1,
+        },
+        {
+          label: 'Serializers',
+          data: T_SER,
+          backgroundColor: '#3b82f677',
+          borderColor: '#3b82f6',
+          borderWidth: 1,
+        },
+        {
+          label: 'Vistas / Endpoints',
+          data: T_VIW,
+          backgroundColor: '#8b5cf677',
+          borderColor: '#8b5cf6',
+          borderWidth: 1,
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top', align: 'start',
+          labels: { color: '#94a3b8', font: { size: 11 }, padding: 18, boxWidth: 11, boxHeight: 11 }
+        },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} tests` }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          ticks: { color: '#6b7a95', font: { size: 11 } },
+          grid: { color: '#1f2d4555' }
+        },
+        y: {
+          stacked: true,
+          ticks: { color: '#94a3b8', font: { size: 12, weight: '500' } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
