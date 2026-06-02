@@ -62,7 +62,7 @@ class Shipment(models.Model):
     origin_address = models.TextField()
     destination_address = models.TextField()
     destination_city = models.CharField(max_length=100)
-    destination_country = models.CharField(max_length=100, default='Colombia')
+    destination_country = models.CharField(max_length=100, default='Perú')
     recipient_name = models.CharField(max_length=150)
     recipient_phone = models.CharField(max_length=20, null=True, blank=True)
     scheduled_date = models.DateField()

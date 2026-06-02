@@ -14,7 +14,7 @@ class Warehouse(models.Model):
     code = models.CharField(max_length=20, unique=True)
     address = models.TextField()
     city = models.CharField(max_length=100)
-    country = models.CharField(max_length=100, default='Colombia')
+    country = models.CharField(max_length=100, default='Perú')
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     capacity_m3 = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

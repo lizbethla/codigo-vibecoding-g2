@@ -52,10 +52,10 @@ class WarehouseCreationTest(TestCase):
         warehouse = self._make_warehouse()
         self.assertTrue(warehouse.is_active)
 
-    def test_default_country_colombia(self):
-        """El campo country tiene default='Colombia'."""
+    def test_default_country_peru(self):
+        """El campo country tiene default='Perú'."""
         warehouse = self._make_warehouse()
-        self.assertEqual(warehouse.country, 'Colombia')
+        self.assertEqual(warehouse.country, 'Perú')
 
     def test_nullable_fields_accept_none(self):
         """Los campos nullable (manager, latitude, longitude, capacity_m3) aceptan None."""

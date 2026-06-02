@@ -33,13 +33,13 @@ class SupplierCreationTest(TestCase):
         )
         self.assertTrue(supplier.is_active)
 
-    def test_default_country_colombia(self):
-        """El campo country tiene default 'Colombia'."""
+    def test_default_country_peru(self):
+        """El campo country tiene default 'Perú'."""
         supplier = Supplier.objects.create(
             name='Tecnologias Andinas',
             email='soporte@tecandinas.com',
         )
-        self.assertEqual(supplier.country, 'Colombia')
+        self.assertEqual(supplier.country, 'Perú')
 
     def test_timestamps_assigned_on_create(self):
         """created_at y updated_at se asignan automáticamente al crear."""

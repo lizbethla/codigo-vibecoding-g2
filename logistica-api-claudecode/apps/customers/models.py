@@ -18,7 +18,7 @@ class Customer(models.Model):
     phone = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
-    country = models.CharField(max_length=100, default='Colombia')
+    country = models.CharField(max_length=100, default='Perú')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -47,13 +47,13 @@ class CustomerCreationTest(TestCase):
         )
         self.assertTrue(customer.is_active)
 
-    def test_default_country_is_colombia(self):
-        """El país por defecto debe ser Colombia."""
+    def test_default_country_is_peru(self):
+        """El país por defecto debe ser Perú."""
         customer = Customer.objects.create(
             name='Red de Distribución Central',
             email='central@reddistribucion.com',
         )
-        self.assertEqual(customer.country, 'Colombia')
+        self.assertEqual(customer.country, 'Perú')
 
     def test_create_individual_customer(self):
         """Cliente de tipo INDIVIDUAL se crea correctamente."""
