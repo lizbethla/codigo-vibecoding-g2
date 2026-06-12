@@ -16,6 +16,8 @@ export interface ColumnActions {
   onDelete: (w: WarehouseSummary) => void;
   setOrdering: (o: string) => void;
   ordering: string;
+  canChange?: boolean;
+  canDelete?: boolean;
 }
 
 export function createWarehouseColumns(actions: ColumnActions): ColumnDef<WarehouseSummary>[] {
@@ -66,6 +68,9 @@ export function createWarehouseColumns(actions: ColumnActions): ColumnDef<Wareho
       header: '',
       cell: ({ row }) => {
         const warehouse = row.original;
+        const canChange = actions.canChange !== false;
+        const canDelete = actions.canDelete !== false;
+        if (!canChange && !canDelete) return null;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -75,15 +80,19 @@ export function createWarehouseColumns(actions: ColumnActions): ColumnDef<Wareho
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => actions.onEdit(warehouse)}>
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => actions.onDelete(warehouse)}
-              >
-                Eliminar
-              </DropdownMenuItem>
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onEdit(warehouse)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => actions.onDelete(warehouse)}
+                >
+                  Eliminar
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

@@ -9,6 +9,7 @@ import { DriverSheet } from '@/components/drivers/driver-sheet';
 import { DriverDeleteDialog } from '@/components/drivers/driver-delete-dialog';
 import { createDriverColumns } from '@/components/drivers/drivers-columns';
 import { useDrivers } from '@/hooks/use-drivers';
+import { usePermission } from '@/hooks/use-permission';
 
 export default function DriversPage() {
   const [searchInput, setSearchInput] = useState('');
@@ -31,6 +32,8 @@ export default function DriversPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const { canAdd, canChange, canDelete } = usePermission('driver');
 
   const { data, isLoading } = useDrivers({
     page: page + 1,
@@ -57,8 +60,8 @@ export default function DriversPage() {
   }, []);
 
   const columns = useMemo(
-    () => createDriverColumns({ onEdit: handleEdit, onDelete: handleDelete }),
-    [handleEdit, handleDelete],
+    () => createDriverColumns({ onEdit: handleEdit, onDelete: handleDelete, canChange, canDelete }),
+    [handleEdit, handleDelete, canChange, canDelete],
   );
 
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;
@@ -91,14 +94,16 @@ export default function DriversPage() {
               placeholder: 'Buscar por cédula o licencia…',
             }}
             actions={
-              <Button
-                size="sm"
-                onClick={() => { setSelectedDriverId(undefined); setSheetOpen(true); }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Nuevo conductor</span>
-                <span className="sm:hidden">Nuevo</span>
-              </Button>
+              canAdd ? (
+                <Button
+                  size="sm"
+                  onClick={() => { setSelectedDriverId(undefined); setSheetOpen(true); }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Nuevo conductor</span>
+                  <span className="sm:hidden">Nuevo</span>
+                </Button>
+              ) : undefined
             }
           />
         )}

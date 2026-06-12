@@ -18,6 +18,8 @@ interface ColumnActions {
   onDelete: (customer: Customer) => void;
   setOrdering: (ordering: string) => void;
   ordering: string;
+  canChange?: boolean;
+  canDelete?: boolean;
 }
 
 export function createCustomerColumns(actions: ColumnActions): ColumnDef<Customer>[] {
@@ -72,6 +74,9 @@ export function createCustomerColumns(actions: ColumnActions): ColumnDef<Custome
       header: '',
       cell: ({ row }) => {
         const customer = row.original;
+        const canChange = actions.canChange !== false;
+        const canDelete = actions.canDelete !== false;
+        if (!canChange && !canDelete) return null;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -81,18 +86,24 @@ export function createCustomerColumns(actions: ColumnActions): ColumnDef<Custome
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => actions.onEdit(customer)}>
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => actions.onToggleActive(customer)}>
-                {customer.is_active ? 'Desactivar' : 'Activar'}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => actions.onDelete(customer)}
-              >
-                Eliminar
-              </DropdownMenuItem>
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onEdit(customer)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onToggleActive(customer)}>
+                  {customer.is_active ? 'Desactivar' : 'Activar'}
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => actions.onDelete(customer)}
+                >
+                  Eliminar
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

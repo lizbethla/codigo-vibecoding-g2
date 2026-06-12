@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from common.permissions import StrictDjangoModelPermissions
 from .models import Route, RouteStop
 from .serializers import (
     RouteListSerializer, RouteDetailSerializer, RouteWriteSerializer,
@@ -22,7 +23,7 @@ from .filters import RouteFilter
 )
 class RouteViewSet(viewsets.ModelViewSet):
     queryset = Route.objects.prefetch_related('stops')
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
     filterset_class = RouteFilter
     search_fields = ['name', 'code']
     ordering_fields = ['name', 'code', 'origin_city', 'destination_city', 'created_at']
@@ -53,7 +54,7 @@ class RouteViewSet(viewsets.ModelViewSet):
     destroy=extend_schema(tags=['Rutas']),
 )
 class RouteStopViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):

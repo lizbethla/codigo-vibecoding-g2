@@ -9,6 +9,7 @@ import { WarehouseSheet } from '@/components/warehouses/warehouse-sheet';
 import { WarehouseDeleteDialog } from '@/components/warehouses/warehouse-delete-dialog';
 import { createWarehouseColumns } from '@/components/warehouses/warehouses-columns';
 import { useWarehouses } from '@/hooks/use-warehouses';
+import { usePermission } from '@/hooks/use-permission';
 import type { WarehouseSummary } from '@/docs/schemas';
 
 export default function WarehousesPage() {
@@ -31,6 +32,8 @@ export default function WarehousesPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const { canAdd, canChange, canDelete } = usePermission('warehouse');
 
   const { data, isLoading } = useWarehouses({
     page: page + 1,
@@ -66,8 +69,10 @@ export default function WarehousesPage() {
         onDelete: handleDelete,
         setOrdering: handleOrdering,
         ordering,
+        canChange,
+        canDelete,
       }),
-    [handleEdit, handleDelete, handleOrdering, ordering],
+    [handleEdit, handleDelete, handleOrdering, ordering, canChange, canDelete],
   );
 
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;
@@ -100,14 +105,16 @@ export default function WarehousesPage() {
               placeholder: 'Buscar por código o nombre…',
             }}
             actions={
-              <Button
-                size="sm"
-                onClick={() => { setSelectedWarehouseId(undefined); setSheetOpen(true); }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Nuevo almacén</span>
-                <span className="sm:hidden">Nuevo</span>
-              </Button>
+              canAdd ? (
+                <Button
+                  size="sm"
+                  onClick={() => { setSelectedWarehouseId(undefined); setSheetOpen(true); }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Nuevo almacén</span>
+                  <span className="sm:hidden">Nuevo</span>
+                </Button>
+              ) : undefined
             }
           />
         )}

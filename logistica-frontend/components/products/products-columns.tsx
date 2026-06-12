@@ -29,6 +29,8 @@ interface ColumnActions {
   onDelete: (product: Product) => void;
   setOrdering: (ordering: string) => void;
   ordering: string;
+  canChange?: boolean;
+  canDelete?: boolean;
 }
 
 export function createProductColumns(actions: ColumnActions): ColumnDef<Product>[] {
@@ -109,6 +111,9 @@ export function createProductColumns(actions: ColumnActions): ColumnDef<Product>
       header: '',
       cell: ({ row }) => {
         const product = row.original;
+        const canChange = actions.canChange !== false;
+        const canDelete = actions.canDelete !== false;
+        if (!canChange && !canDelete) return null;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -118,18 +123,24 @@ export function createProductColumns(actions: ColumnActions): ColumnDef<Product>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => actions.onEdit(product)}>
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => actions.onToggleActive(product)}>
-                {product.is_active ? 'Desactivar' : 'Activar'}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => actions.onDelete(product)}
-              >
-                Eliminar
-              </DropdownMenuItem>
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onEdit(product)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onToggleActive(product)}>
+                  {product.is_active ? 'Desactivar' : 'Activar'}
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => actions.onDelete(product)}
+                >
+                  Eliminar
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

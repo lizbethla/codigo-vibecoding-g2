@@ -47,6 +47,8 @@ export const FUEL_TYPE_LABELS: Record<FuelType, string> = {
 export interface ColumnActions {
   onEdit: (id: number, plate: string) => void;
   onDelete: (id: number, plate: string) => void;
+  canChange?: boolean;
+  canDelete?: boolean;
 }
 
 export function createVehicleColumns(actions: ColumnActions): ColumnDef<VehicleListItem>[] {
@@ -99,6 +101,9 @@ export function createVehicleColumns(actions: ColumnActions): ColumnDef<VehicleL
       header: '',
       cell: ({ row }) => {
         const vehicle = row.original;
+        const canChange = actions.canChange !== false;
+        const canDelete = actions.canDelete !== false;
+        if (!canChange && !canDelete) return null;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -108,15 +113,19 @@ export function createVehicleColumns(actions: ColumnActions): ColumnDef<VehicleL
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => actions.onEdit(vehicle.id, vehicle.plate)}>
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => actions.onDelete(vehicle.id, vehicle.plate)}
-              >
-                Eliminar
-              </DropdownMenuItem>
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onEdit(vehicle.id, vehicle.plate)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => actions.onDelete(vehicle.id, vehicle.plate)}
+                >
+                  Eliminar
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

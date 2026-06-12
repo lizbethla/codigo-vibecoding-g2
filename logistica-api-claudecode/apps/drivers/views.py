@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from common.permissions import StrictDjangoModelPermissions
 from .models import Driver
 from .serializers import DriverListSerializer, DriverDetailSerializer, DriverWriteSerializer
 from .filters import DriverFilter
@@ -17,7 +18,7 @@ from .filters import DriverFilter
 )
 class DriverViewSet(viewsets.ModelViewSet):
     queryset = Driver.objects.select_related('user')
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
     filterset_class = DriverFilter
     search_fields = ['national_id', 'license_number']
     ordering_fields = ['status', 'license_expiry', 'created_at']

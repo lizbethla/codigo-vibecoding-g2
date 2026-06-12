@@ -697,8 +697,8 @@ export default function DashboardPage() {
                       dataKey="total"
                       position="top"
                       style={{ fontSize: 10, fill: '#64748b', fontWeight: 500 }}
-                      formatter={(v: number) =>
-                        `S/ ${v.toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                      formatter={(v) =>
+                        `S/ ${Number(v).toLocaleString('es-PE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
                       }
                     />
                   </Line>

@@ -9,6 +9,7 @@ import { CustomerSheet } from '@/components/customers/customer-sheet';
 import { CustomerDeleteDialog } from '@/components/customers/customer-delete-dialog';
 import { createCustomerColumns } from '@/components/customers/customers-columns';
 import { useCustomers, useUpdateCustomer } from '@/hooks/use-customers';
+import { usePermission } from '@/hooks/use-permission';
 import type { Customer } from '@/docs/schemas';
 
 export default function CustomersPage() {
@@ -31,6 +32,8 @@ export default function CustomersPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const { canAdd, canChange, canDelete } = usePermission('customer');
 
   const { data, isLoading } = useCustomers({
     page: page + 1,
@@ -76,8 +79,10 @@ export default function CustomersPage() {
         onDelete: handleDelete,
         setOrdering: handleOrdering,
         ordering,
+        canChange,
+        canDelete,
       }),
-    [handleEdit, handleToggleActive, handleDelete, handleOrdering, ordering],
+    [handleEdit, handleToggleActive, handleDelete, handleOrdering, ordering, canChange, canDelete],
   );
 
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;
@@ -112,14 +117,16 @@ export default function CustomersPage() {
               placeholder: 'Buscar por nombre o correo…',
             }}
             actions={
-              <Button
-                size="sm"
-                onClick={() => { setSelectedCustomer(undefined); setSheetOpen(true); }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Nuevo cliente</span>
-                <span className="sm:hidden">Nuevo</span>
-              </Button>
+              canAdd ? (
+                <Button
+                  size="sm"
+                  onClick={() => { setSelectedCustomer(undefined); setSheetOpen(true); }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Nuevo cliente</span>
+                  <span className="sm:hidden">Nuevo</span>
+                </Button>
+              ) : undefined
             }
           />
         )}

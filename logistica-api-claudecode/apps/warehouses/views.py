@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from common.permissions import StrictDjangoModelPermissions
 from .models import Warehouse
 from .serializers import WarehouseListSerializer, WarehouseDetailSerializer, WarehouseWriteSerializer
 from .filters import WarehouseFilter
@@ -17,7 +18,7 @@ from .filters import WarehouseFilter
 )
 class WarehouseViewSet(viewsets.ModelViewSet):
     queryset = Warehouse.objects.select_related('manager')
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
     filterset_class = WarehouseFilter
     search_fields = ['name', 'code']
     ordering_fields = ['name', 'code', 'city', 'created_at']

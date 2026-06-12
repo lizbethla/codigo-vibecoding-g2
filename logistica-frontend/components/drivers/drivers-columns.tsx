@@ -38,6 +38,8 @@ export const STATUS_BADGE_CLASSES: Record<DriverStatus, string> = {
 export interface ColumnActions {
   onEdit: (id: number, name: string) => void;
   onDelete: (id: number, name: string) => void;
+  canChange?: boolean;
+  canDelete?: boolean;
 }
 
 export function createDriverColumns(actions: ColumnActions): ColumnDef<DriverListItem>[] {
@@ -96,6 +98,9 @@ export function createDriverColumns(actions: ColumnActions): ColumnDef<DriverLis
             ? `${user.first_name} ${user.last_name}`.trim()
             : user.username;
 
+        const canChange = actions.canChange !== false;
+        const canDelete = actions.canDelete !== false;
+        if (!canChange && !canDelete) return null;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -105,15 +110,19 @@ export function createDriverColumns(actions: ColumnActions): ColumnDef<DriverLis
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => actions.onEdit(driver.id, name)}>
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => actions.onDelete(driver.id, name)}
-              >
-                Eliminar
-              </DropdownMenuItem>
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onEdit(driver.id, name)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => actions.onDelete(driver.id, name)}
+                >
+                  Eliminar
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

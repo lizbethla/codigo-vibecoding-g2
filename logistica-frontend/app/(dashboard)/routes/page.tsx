@@ -10,6 +10,7 @@ import { RouteSheet } from '@/components/routes/route-sheet';
 import { RouteDeleteDialog } from '@/components/routes/route-delete-dialog';
 import { createRouteColumns } from '@/components/routes/routes-columns';
 import { useRoutes } from '@/hooks/use-routes';
+import { usePermission } from '@/hooks/use-permission';
 
 export default function RoutesPage() {
   const router = useRouter();
@@ -34,6 +35,8 @@ export default function RoutesPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const { canAdd, canChange, canDelete } = usePermission('route');
 
   const { data, isLoading } = useRoutes({
     page: page + 1,
@@ -64,8 +67,8 @@ export default function RoutesPage() {
   }, []);
 
   const columns = useMemo(
-    () => createRouteColumns({ onEdit: handleEdit, onDelete: handleDelete, onView }),
-    [handleEdit, handleDelete, onView],
+    () => createRouteColumns({ onEdit: handleEdit, onDelete: handleDelete, onView, canChange, canDelete }),
+    [handleEdit, handleDelete, onView, canChange, canDelete],
   );
 
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;
@@ -98,14 +101,16 @@ export default function RoutesPage() {
               placeholder: 'Buscar por nombre o código…',
             }}
             actions={
-              <Button
-                size="sm"
-                onClick={() => { setSelectedRouteId(undefined); setSheetOpen(true); }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Nueva ruta</span>
-                <span className="sm:hidden">Nueva</span>
-              </Button>
+              canAdd ? (
+                <Button
+                  size="sm"
+                  onClick={() => { setSelectedRouteId(undefined); setSheetOpen(true); }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Nueva ruta</span>
+                  <span className="sm:hidden">Nueva</span>
+                </Button>
+              ) : undefined
             }
           />
         )}

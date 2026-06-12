@@ -55,6 +55,8 @@ export interface ColumnActions {
   onEdit: (id: number) => void;
   onDelete: (id: number, trackingCode: string) => void;
   onView: (id: number) => void;
+  canChange?: boolean;
+  canDelete?: boolean;
 }
 
 export function createShipmentColumns(actions: ColumnActions): ColumnDef<ShipmentListItem>[] {
@@ -124,6 +126,8 @@ export function createShipmentColumns(actions: ColumnActions): ColumnDef<Shipmen
       header: '',
       cell: ({ row }) => {
         const shipment = row.original;
+        const canChange = actions.canChange !== false;
+        const canDelete = actions.canDelete !== false;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -136,15 +140,19 @@ export function createShipmentColumns(actions: ColumnActions): ColumnDef<Shipmen
               <DropdownMenuItem onClick={() => actions.onView(shipment.id)}>
                 Ver detalle
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => actions.onEdit(shipment.id)}>
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => actions.onDelete(shipment.id, shipment.tracking_code)}
-              >
-                Eliminar
-              </DropdownMenuItem>
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onEdit(shipment.id)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => actions.onDelete(shipment.id, shipment.tracking_code)}
+                >
+                  Eliminar
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

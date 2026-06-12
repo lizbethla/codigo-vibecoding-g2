@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from common.permissions import StrictDjangoModelPermissions
 from .models import Product
 from .serializers import ProductListSerializer, ProductDetailSerializer, ProductWriteSerializer
 from .filters import ProductFilter
@@ -17,7 +18,7 @@ from .filters import ProductFilter
 )
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.select_related('supplier')
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
     filterset_class = ProductFilter
     search_fields = ['name', 'sku']
     ordering_fields = ['name', 'unit_price', 'stock_quantity', 'created_at']

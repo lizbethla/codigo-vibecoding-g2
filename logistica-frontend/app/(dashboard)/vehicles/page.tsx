@@ -9,6 +9,7 @@ import { VehicleSheet } from '@/components/vehicles/vehicle-sheet';
 import { VehicleDeleteDialog } from '@/components/vehicles/vehicle-delete-dialog';
 import { createVehicleColumns } from '@/components/vehicles/vehicles-columns';
 import { useVehicles } from '@/hooks/use-vehicles';
+import { usePermission } from '@/hooks/use-permission';
 
 export default function VehiclesPage() {
   const [searchInput, setSearchInput] = useState('');
@@ -31,6 +32,8 @@ export default function VehiclesPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const { canAdd, canChange, canDelete } = usePermission('vehicle');
 
   const { data, isLoading } = useVehicles({
     page: page + 1,
@@ -57,8 +60,8 @@ export default function VehiclesPage() {
   }, []);
 
   const columns = useMemo(
-    () => createVehicleColumns({ onEdit: handleEdit, onDelete: handleDelete }),
-    [handleEdit, handleDelete],
+    () => createVehicleColumns({ onEdit: handleEdit, onDelete: handleDelete, canChange, canDelete }),
+    [handleEdit, handleDelete, canChange, canDelete],
   );
 
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;
@@ -91,14 +94,16 @@ export default function VehiclesPage() {
               placeholder: 'Buscar por placa…',
             }}
             actions={
-              <Button
-                size="sm"
-                onClick={() => { setSelectedVehicleId(undefined); setSheetOpen(true); }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Nuevo vehículo</span>
-                <span className="sm:hidden">Nuevo</span>
-              </Button>
+              canAdd ? (
+                <Button
+                  size="sm"
+                  onClick={() => { setSelectedVehicleId(undefined); setSheetOpen(true); }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Nuevo vehículo</span>
+                  <span className="sm:hidden">Nuevo</span>
+                </Button>
+              ) : undefined
             }
           />
         )}

@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from common.permissions import StrictDjangoModelPermissions
 from .models import Customer
 from .serializers import CustomerListSerializer, CustomerDetailSerializer, CustomerWriteSerializer
 from .filters import CustomerFilter
@@ -17,7 +18,7 @@ from .filters import CustomerFilter
 )
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
     filterset_class = CustomerFilter
     search_fields = ['name', 'email']
     ordering_fields = ['name', 'created_at']

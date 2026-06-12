@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from common.permissions import StrictDjangoModelPermissions
 from .models import Shipment, ShipmentProduct
 from .serializers import (
     ShipmentListSerializer, ShipmentDetailSerializer, ShipmentWriteSerializer,
@@ -24,7 +25,7 @@ class ShipmentViewSet(viewsets.ModelViewSet):
     queryset = Shipment.objects.select_related(
         'customer', 'origin_warehouse', 'route', 'vehicle'
     ).prefetch_related('shipment_products__product')
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
     filterset_class = ShipmentFilter
     search_fields = ['tracking_code', 'recipient_name']
     ordering_fields = ['scheduled_date', 'created_at', 'total_cost', 'status']
@@ -55,7 +56,7 @@ class ShipmentViewSet(viewsets.ModelViewSet):
     destroy=extend_schema(tags=['Envíos']),
 )
 class ShipmentProductViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):

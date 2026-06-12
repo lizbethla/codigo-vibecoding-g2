@@ -9,6 +9,7 @@ import { SupplierSheet } from '@/components/suppliers/supplier-sheet';
 import { SupplierDeleteDialog } from '@/components/suppliers/supplier-delete-dialog';
 import { createSupplierColumns } from '@/components/suppliers/suppliers-columns';
 import { useSuppliers, useUpdateSupplier } from '@/hooks/use-suppliers';
+import { usePermission } from '@/hooks/use-permission';
 import type { Supplier } from '@/docs/schemas';
 
 export default function SuppliersPage() {
@@ -31,6 +32,8 @@ export default function SuppliersPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const { canAdd, canChange, canDelete } = usePermission('supplier');
 
   const { data, isLoading } = useSuppliers({
     page: page + 1,
@@ -76,8 +79,10 @@ export default function SuppliersPage() {
         onDelete: handleDelete,
         setOrdering: handleOrdering,
         ordering,
+        canChange,
+        canDelete,
       }),
-    [handleEdit, handleToggleActive, handleDelete, handleOrdering, ordering],
+    [handleEdit, handleToggleActive, handleDelete, handleOrdering, ordering, canChange, canDelete],
   );
 
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;
@@ -110,14 +115,16 @@ export default function SuppliersPage() {
               placeholder: 'Buscar por nombre o correo…',
             }}
             actions={
-              <Button
-                size="sm"
-                onClick={() => { setSelectedSupplier(undefined); setSheetOpen(true); }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Nuevo proveedor</span>
-                <span className="sm:hidden">Nuevo</span>
-              </Button>
+              canAdd ? (
+                <Button
+                  size="sm"
+                  onClick={() => { setSelectedSupplier(undefined); setSheetOpen(true); }}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Nuevo proveedor</span>
+                  <span className="sm:hidden">Nuevo</span>
+                </Button>
+              ) : undefined
             }
           />
         )}

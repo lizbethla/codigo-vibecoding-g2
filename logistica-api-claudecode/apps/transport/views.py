@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from common.permissions import StrictDjangoModelPermissions
 from .models import Vehicle
 from .serializers import VehicleListSerializer, VehicleDetailSerializer, VehicleWriteSerializer
 from .filters import VehicleFilter
@@ -17,7 +18,7 @@ from .filters import VehicleFilter
 )
 class VehicleViewSet(viewsets.ModelViewSet):
     queryset = Vehicle.objects.select_related('driver', 'driver__user')
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
     filterset_class = VehicleFilter
     search_fields = ['plate']
     ordering_fields = ['plate', 'year', 'status', 'created_at']

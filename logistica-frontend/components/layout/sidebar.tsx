@@ -9,26 +9,32 @@ import {
   Package,
   PackageOpen,
   Route,
+  ShieldCheck,
   Truck,
   UserCheck,
   Users,
+  Users2,
   Warehouse,
   X,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth.store';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/customers', label: 'Clientes', icon: Users },
-  { href: '/suppliers', label: 'Proveedores', icon: Building2 },
-  { href: '/warehouses', label: 'Almacenes', icon: Warehouse },
-  { href: '/products', label: 'Productos', icon: Package },
-  { href: '/drivers', label: 'Conductores', icon: UserCheck },
-  { href: '/vehicles', label: 'Vehículos', icon: Truck },
-  { href: '/routes', label: 'Rutas', icon: Route },
-  { href: '/shipments', label: 'Envíos', icon: PackageOpen },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, model: null },
+  { href: '/customers', label: 'Clientes', icon: Users, model: 'customer' },
+  { href: '/suppliers', label: 'Proveedores', icon: Building2, model: 'supplier' },
+  { href: '/warehouses', label: 'Almacenes', icon: Warehouse, model: 'warehouse' },
+  { href: '/products', label: 'Productos', icon: Package, model: 'product' },
+  { href: '/drivers', label: 'Conductores', icon: UserCheck, model: 'driver' },
+  { href: '/vehicles', label: 'Vehículos', icon: Truck, model: 'vehicle' },
+  { href: '/routes', label: 'Rutas', icon: Route, model: 'route' },
+  { href: '/shipments', label: 'Envíos', icon: PackageOpen, model: 'shipment' },
+];
+
+const adminLinks = [
+  { href: '/admin/users', label: 'Usuarios', icon: ShieldCheck },
+  { href: '/admin/groups', label: 'Grupos', icon: Users2 },
 ];
 
 interface SidebarProps {
@@ -38,6 +44,11 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin());
+  const hasPermission = useAuthStore((s) => s.hasPermission);
+  const visibleNavLinks = navLinks.filter(
+    ({ model }) => !model || hasPermission(`view_${model}`),
+  );
 
   function handleLogout() {
     useAuthStore.getState().logout();
@@ -78,7 +89,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {navLinks.map(({ href, label, icon: Icon }) => {
+          {visibleNavLinks.map(({ href, label, icon: Icon }) => {
             const isActive =
               pathname === href || pathname.startsWith(href + '/');
             return (
@@ -98,6 +109,34 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               </Link>
             );
           })}
+
+          {isSuperAdmin && (
+            <div className="pt-4">
+              <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                Administración
+              </p>
+              {adminLinks.map(({ href, label, icon: Icon }) => {
+                const isActive =
+                  pathname === href || pathname.startsWith(href + '/');
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={onClose}
+                    className={cn(
+                      'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-blue-600 text-white'
+                        : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100',
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </nav>
 
         {/* Logout */}

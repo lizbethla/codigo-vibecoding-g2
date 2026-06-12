@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from common.permissions import StrictDjangoModelPermissions
 from .models import Supplier
 from .serializers import SupplierListSerializer, SupplierDetailSerializer, SupplierWriteSerializer
 from .filters import SupplierFilter
@@ -17,7 +18,7 @@ from .filters import SupplierFilter
 )
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, StrictDjangoModelPermissions]
     filterset_class = SupplierFilter
     search_fields = ['name', 'email']
     ordering_fields = ['name', 'created_at']

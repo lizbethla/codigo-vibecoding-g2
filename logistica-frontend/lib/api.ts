@@ -26,12 +26,15 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config;
     if (error.response?.status === 401 && !original._retry) {
+      // Only attempt refresh if the user was authenticated (has a refresh token).
+      // Without this guard, failed login requests (no refresh token) would trigger
+      // a redirect loop instead of letting the caller show the error.
+      const raw = typeof window !== 'undefined' ? localStorage.getItem('logistica-auth') : null;
+      const refresh = raw ? JSON.parse(raw)?.state?.refreshToken : null;
+      if (!refresh) return Promise.reject(error);
+
       original._retry = true;
       try {
-        const raw = localStorage.getItem('logistica-auth');
-        const refresh = raw ? JSON.parse(raw)?.state?.refreshToken : null;
-        if (!refresh) throw new Error('no refresh token');
-
         const { data } = await axios.post(`${BASE_URL}/auth/token/refresh/`, {
           refresh,
         });

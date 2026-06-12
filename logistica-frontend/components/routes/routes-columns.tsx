@@ -21,6 +21,8 @@ export interface ColumnActions {
   onEdit: (id: number, name: string) => void;
   onDelete: (id: number, name: string) => void;
   onView: (id: number) => void;
+  canChange?: boolean;
+  canDelete?: boolean;
 }
 
 export function createRouteColumns(actions: ColumnActions): ColumnDef<RouteListItem>[] {
@@ -71,6 +73,8 @@ export function createRouteColumns(actions: ColumnActions): ColumnDef<RouteListI
       header: '',
       cell: ({ row }) => {
         const route = row.original;
+        const canChange = actions.canChange !== false;
+        const canDelete = actions.canDelete !== false;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -83,15 +87,19 @@ export function createRouteColumns(actions: ColumnActions): ColumnDef<RouteListI
               <DropdownMenuItem onClick={() => actions.onView(route.id)}>
                 Ver detalle
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => actions.onEdit(route.id, route.name)}>
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => actions.onDelete(route.id, route.name)}
-              >
-                Eliminar
-              </DropdownMenuItem>
+              {canChange && (
+                <DropdownMenuItem onClick={() => actions.onEdit(route.id, route.name)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() => actions.onDelete(route.id, route.name)}
+                >
+                  Eliminar
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

@@ -6,6 +6,72 @@
 export interface TokenPair {
   access: string;
   refresh: string;
+  is_superuser: boolean;
+  is_staff: boolean;
+  user_id: number;
+  username: string;
+  email: string;
+}
+
+export interface AppUser {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_active: boolean;
+  is_staff: boolean;
+  is_superuser: boolean;
+  groups: Group[];
+  date_joined?: string;
+  last_login?: string | null;
+}
+
+export interface AppUserCreate {
+  username: string;
+  password: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  is_active?: boolean;
+  is_staff?: boolean;
+  groups?: number[];
+}
+
+export type AppUserUpdate = Partial<Omit<AppUserCreate, 'password'> & { password?: string }>;
+
+export interface Permission {
+  id: number;
+  name: string;
+  codename: string;
+  content_type_label: string;
+}
+
+export interface Group {
+  id: number;
+  name: string;
+  permissions?: Permission[];
+}
+
+export interface GroupCreate {
+  name: string;
+  permissions?: number[];
+}
+
+export type GroupUpdate = GroupCreate;
+
+export interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_active: boolean;
+  is_staff: boolean;
+  is_superuser: boolean;
+  groups: Group[];
+  date_joined: string;
+  last_login: string | null;
 }
 
 export interface LoginCredentials {

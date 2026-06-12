@@ -11,6 +11,7 @@ import { ShipmentEditSheet } from '@/components/shipments/shipment-edit-sheet';
 import { ShipmentDeleteDialog } from '@/components/shipments/shipment-delete-dialog';
 import { createShipmentColumns } from '@/components/shipments/shipments-columns';
 import { useShipments } from '@/hooks/use-shipments';
+import { usePermission } from '@/hooks/use-permission';
 
 export default function ShipmentsPage() {
   const router = useRouter();
@@ -37,6 +38,8 @@ export default function ShipmentsPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const { canAdd, canChange, canDelete } = usePermission('shipment');
 
   const { data, isLoading } = useShipments({
     page: page + 1,
@@ -67,8 +70,8 @@ export default function ShipmentsPage() {
   }, []);
 
   const columns = useMemo(
-    () => createShipmentColumns({ onEdit: handleEdit, onDelete: handleDelete, onView }),
-    [handleEdit, handleDelete, onView],
+    () => createShipmentColumns({ onEdit: handleEdit, onDelete: handleDelete, onView, canChange, canDelete }),
+    [handleEdit, handleDelete, onView, canChange, canDelete],
   );
 
   const pageCount = data ? Math.ceil(data.count / pageSize) : 0;
@@ -101,11 +104,13 @@ export default function ShipmentsPage() {
               placeholder: 'Buscar por código o destinatario…',
             }}
             actions={
-              <Button size="sm" onClick={() => setCreateSheetOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Nuevo envío</span>
-                <span className="sm:hidden">Nuevo</span>
-              </Button>
+              canAdd ? (
+                <Button size="sm" onClick={() => setCreateSheetOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">Nuevo envío</span>
+                  <span className="sm:hidden">Nuevo</span>
+                </Button>
+              ) : undefined
             }
           />
         )}
