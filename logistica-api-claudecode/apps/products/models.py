@@ -29,6 +29,8 @@ class Product(models.Model):
     dimensions_cm = models.CharField(max_length=50, null=True, blank=True)
     stock_quantity = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    stripe_product_id = models.CharField(max_length=100, null=True, blank=True, unique=True)
+    stripe_price_id   = models.CharField(max_length=100, null=True, blank=True, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

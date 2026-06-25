@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'apps.transport',
     'apps.routes',
     'apps.shipments',
+    'apps.payments',
 ]
 
 MIDDLEWARE = [
@@ -116,3 +117,11 @@ SPECTACULAR_SETTINGS = {
         'ShipmentStatusEnum': 'apps.shipments.models.ShipmentStatus',
     },
 }
+
+# ── Stripe ──────────────────────────────────────────────────────────────────
+STRIPE_SECRET_KEY      = config('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_WEBHOOK_SECRET  = config('STRIPE_WEBHOOK_SECRET', default='')
+STRIPE_API_VERSION     = '2026-04-22.dahlia'
+STRIPE_SUCCESS_URL     = config('STRIPE_SUCCESS_URL', default='http://localhost:3000/checkout/success')
+STRIPE_CANCEL_URL      = config('STRIPE_CANCEL_URL',  default='http://localhost:3000/checkout/cancel')

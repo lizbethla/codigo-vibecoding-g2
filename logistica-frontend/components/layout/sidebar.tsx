@@ -10,6 +10,7 @@ import {
   PackageOpen,
   Route,
   ShieldCheck,
+  ShoppingCart,
   Truck,
   UserCheck,
   Users,
@@ -30,6 +31,7 @@ const navLinks = [
   { href: '/vehicles', label: 'Vehículos', icon: Truck, model: 'vehicle' },
   { href: '/routes', label: 'Rutas', icon: Route, model: 'route' },
   { href: '/shipments', label: 'Envíos', icon: PackageOpen, model: 'shipment' },
+  { href: '/cart', label: 'Tienda', icon: ShoppingCart, model: null },
 ];
 
 const adminLinks = [

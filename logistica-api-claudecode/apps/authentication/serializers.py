@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -24,6 +25,7 @@ class PermissionSerializer(serializers.ModelSerializer):
         model = Permission
         fields = ['id', 'name', 'codename', 'content_type_label']
 
+    @extend_schema_field(serializers.CharField())
     def get_content_type_label(self, obj):
         return f"{obj.content_type.app_label} | {obj.content_type.model}"
 
